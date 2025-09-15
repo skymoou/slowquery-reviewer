@@ -78,11 +78,49 @@ else
     log_warning "服务可能已经停止或不存在"
 fi
 
-# 6. 更新代码
-log_info "🔄 应用代码更新..."
+# 6. 备份配置文件
+log_info "💾 备份重要配置文件..."
+CONFIG_BACKUP_DIR="/tmp/slowquery_config_backup_$(date +%Y%m%d_%H%M%S)"
+mkdir -p "$CONFIG_BACKUP_DIR"
+
+# 备份重要配置文件
+if [ -f "backend/config.py" ]; then
+    cp "backend/config.py" "$CONFIG_BACKUP_DIR/"
+    log_success "已备份 backend/config.py"
+fi
+
+if [ -f "backend/.env" ]; then
+    cp "backend/.env" "$CONFIG_BACKUP_DIR/"
+    log_success "已备份 backend/.env"
+fi
+
+# 7. 更新代码（使用 stash 保护本地配置）
+log_info "🔄 应用代码更新（保护本地配置）..."
+
+# 暂存本地配置文件
+git add -A
+if git diff --cached --quiet; then
+    log_info "无本地配置变更"
+else
+    git stash push -m "自动备份本地配置 $(date)"
+    log_info "已暂存本地配置文件"
+fi
+
+# 拉取远程更新
 git pull origin main
 
-# 7. 检查是否有后端文件变更
+# 恢复本地配置文件
+if [ -f "$CONFIG_BACKUP_DIR/config.py" ]; then
+    cp "$CONFIG_BACKUP_DIR/config.py" "backend/config.py"
+    log_success "已恢复 backend/config.py 配置"
+fi
+
+if [ -f "$CONFIG_BACKUP_DIR/.env" ]; then
+    cp "$CONFIG_BACKUP_DIR/.env" "backend/.env"
+    log_success "已恢复 backend/.env 配置"
+fi
+
+# 8. 检查是否有后端文件变更
 BACKEND_CHANGED=$(git diff --name-only $CURRENT_COMMIT $LATEST_COMMIT | grep -c "backend/" || echo "0")
 FRONTEND_CHANGED=$(git diff --name-only $CURRENT_COMMIT $LATEST_COMMIT | grep -c "frontend/" || echo "0")
 
@@ -121,11 +159,11 @@ else
     log_info "✅ 前端无变更，跳过构建"
 fi
 
-# 8. 启动后端服务
+# 9. 启动后端服务
 log_info "🚀 启动后端服务..."
 sudo supervisorctl start $SERVICE_NAME
 
-# 9. 等待服务启动并检查状态
+# 10. 等待服务启动并检查状态
 sleep 3
 if sudo supervisorctl status $SERVICE_NAME | grep -q "RUNNING"; then
     log_success "✅ 后端服务启动成功"
@@ -136,13 +174,13 @@ else
     exit 1
 fi
 
-# 10. 重新加载Nginx（如果有前端变更）
+# 11. 重新加载Nginx（如果有前端变更）
 if [ "$FRONTEND_CHANGED" -gt 0 ]; then
     log_info "🔄 重新加载Nginx..."
     sudo systemctl reload nginx
 fi
 
-# 11. 健康检查
+# 12. 健康检查
 log_info "🏥 执行健康检查..."
 sleep 2
 
@@ -160,7 +198,7 @@ else
     log_warning "⚠️  前端页面检查失败，请手动验证"
 fi
 
-# 12. 显示更新完成信息
+# 13. 显示更新完成信息
 log_success "🎉 增量更新完成！"
 echo
 echo "📊 更新摘要："
