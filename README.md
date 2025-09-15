@@ -1,10 +1,14 @@
 # 🐌 MySQL慢查询分析系统
 
+[![Version](https://img.shields.io/badge/version-v1.0.0-brightgreen.svg)](https://github.com/skymoou/slowquery-reviewer/releases/tag/v1.0.0)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Flask Version](https://img.shields.io/badge/flask-2.3.3-green.svg)](https://flask.palletsprojects.com/)
+[![Production Ready](https://img.shields.io/badge/production-ready-success.svg)](https://github.com/skymoou/slowquery-reviewer)
 
 一个功能强大的MySQL慢查询日志分析系统，帮助数据库管理员快速定位性能瓶颈，优化数据库查询性能。
+
+> **🎉 v1.0.0 正式发布！** 这是第一个生产就绪版本，包含完整功能和部署能力。
 
 ## ✨ 核心特性
 
@@ -374,6 +378,11 @@ Authorization: Bearer <token>
 GET /api/statistics/summary
 Authorization: Bearer <token>
 ```
+
+## 📋 版本历史
+
+- **v1.0.0** (2024-09-15) - 首个生产版本，完整功能实现
+- 详细版本记录请查看 [VERSION_HISTORY.md](VERSION_HISTORY.md)
 
 ## 🤝 贡献指南
 
