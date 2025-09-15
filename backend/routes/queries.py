@@ -89,7 +89,11 @@ def get_slow_queries():
         page = int(request.args.get('page', 1))
         offset = (page - 1) * per_page
         
-        base_query += " ORDER BY last_occurrence DESC LIMIT %s OFFSET %s"
+        # 按执行次数倒序排序，如果有过滤条件则优先按执行次数排序
+        if username or dbname:
+            base_query += " ORDER BY total_occurrences DESC, last_occurrence DESC LIMIT %s OFFSET %s"
+        else:
+            base_query += " ORDER BY last_occurrence DESC LIMIT %s OFFSET %s"
         params.extend([per_page, offset])
         
         # 执行查询
