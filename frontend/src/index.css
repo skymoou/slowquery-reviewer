@@ -1,0 +1,65 @@
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.6;  
+  font-weight: 400;
+  color: #333;       
+  background-color: #f8f9fa; 
+}
+
+
+body {
+  margin: 0;
+  display: block;    
+  min-height: 100vh;
+  max-width: 100%; 
+  margin: 0 auto;    
+  padding: 2rem;
+  background-color: #f8f9fa;
+}
+
+/* 卡片悬停效果 */
+.hover-shadow {
+  transition: all 0.2s ease-in-out;
+}
+
+.hover-shadow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+
+/* 代码区域样式 */
+pre {
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+/* 文本样式 */
+.text-monospace {
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+}
+
+
+h1 {
+  font-size: 3.5em;  
+  margin-bottom: 1.5rem;
+}
+
+
+.accordion-item {
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+
+@media (max-width: 768px) {
+  body {
+    padding: 1rem;
+    max-width: 100%;
+  }
+  
+  h1 {
+    font-size: 2.5em;
+  }
+}

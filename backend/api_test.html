@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API路径测试</title>
+</head>
+<body>
+    <h2>前端API路径测试</h2>
+    <button onclick="testLogin()">测试登录API</button>
+    <button onclick="testDirectAPI()">测试直接API调用</button>
+    <div id="result"></div>
+
+    <script>
+        async function testLogin() {
+            const result = document.getElementById('result');
+            result.innerHTML = '测试中...';
+            
+            try {
+                // 测试前端React应用使用的API路径
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'admin',
+                        password: 'Admin@123'
+                    })
+                });
+                
+                const data = await response.json();
+                result.innerHTML = `<h3>前端API测试结果:</h3>
+                    <p>状态: ${response.status}</p>
+                    <p>成功: ${data.success}</p>
+                    <p>消息: ${data.message}</p>`;
+                    
+            } catch (error) {
+                result.innerHTML = `<h3>前端API测试失败:</h3><p>${error.message}</p>`;
+            }
+        }
+        
+        async function testDirectAPI() {
+            const result = document.getElementById('result');
+            result.innerHTML = '测试中...';
+            
+            try {
+                // 测试直接调用后端API
+                const response = await fetch('http://localhost:5172/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'admin',
+                        password: 'Admin@123'
+                    })
+                });
+                
+                const data = await response.json();
+                result.innerHTML = `<h3>直接API测试结果:</h3>
+                    <p>状态: ${response.status}</p>
+                    <p>成功: ${data.success}</p>
+                    <p>消息: ${data.message}</p>`;
+                    
+            } catch (error) {
+                result.innerHTML = `<h3>直接API测试失败:</h3><p>${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

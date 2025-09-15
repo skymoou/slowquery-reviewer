@@ -1,0 +1,18 @@
+# Flask Web框架 - 核心依赖
+Flask==2.3.3
+flask-cors==4.0.0
+
+# 数据库连接器
+mysql-connector-python==8.1.0
+
+# JWT认证
+PyJWT==2.8.0
+
+# 密码加密
+bcrypt==4.0.1
+
+# 环境变量管理
+python-dotenv==1.0.0
+
+# 生产环境WSGI服务器
+gunicorn==21.2.0
