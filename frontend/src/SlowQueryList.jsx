@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { Pagination } from 'react-bootstrap'
 import { queryAPI } from './services/api'
 import { DatabaseIcon, UserIcon, ClockIcon, RefreshIcon, HashIcon, SearchIcon } from './components/Icon'
+import MultiSelectDropdown from './components/MultiSelectDropdown'
 
 const StatusBadge = ({ status }) => (
   <Badge bg={
@@ -88,6 +89,9 @@ export default function SlowQueryList() {
   const [queries, setQueries] = useState({ data: [], total: 0 });
   const [pagination, setPagination] = useState({ page: 1, per_page: 20 });
   const [loading, setLoading] = useState(false);
+  const [databases, setDatabases] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [selectedDatabases, setSelectedDatabases] = useState([]);
 
   // 优化的查询加载函数
   const loadQueries = useCallback(async () => {
@@ -97,6 +101,11 @@ export default function SlowQueryList() {
         ...filter,
         ...pagination
       };
+      
+      // 如果有选中的数据库，添加到参数中
+      if (selectedDatabases.length > 0) {
+        params.dbnames = selectedDatabases.join(',');
+      }
       
       const response = await queryAPI.getQueries(params);
       
@@ -111,11 +120,35 @@ export default function SlowQueryList() {
     } finally {
       setLoading(false);
     }
-  }, [filter, pagination]);
+  }, [filter, pagination, selectedDatabases]);
 
   useEffect(() => {
     loadQueries();
-  }, [filter, pagination]); // 移除loadQueries依赖避免无限循环
+  }, [filter, pagination, selectedDatabases]); // 移除loadQueries依赖避免无限循环
+
+  // 加载数据库和用户列表
+  useEffect(() => {
+    const loadFilterOptions = async () => {
+      try {
+        const [dbResponse, userResponse] = await Promise.all([
+          queryAPI.getDatabases(),
+          queryAPI.getUsers()
+        ]);
+        
+        if (dbResponse.data.success) {
+          setDatabases(dbResponse.data.data);
+        }
+        
+        if (userResponse.data.success) {
+          setUsers(userResponse.data.data);
+        }
+      } catch (error) {
+        console.error('加载过滤选项失败:', error);
+      }
+    };
+    
+    loadFilterOptions();
+  }, []);
 
   const handlePageChange = useCallback((newPage) => {
     setPagination(prev => ({ ...prev, page: newPage }))
@@ -124,6 +157,12 @@ export default function SlowQueryList() {
   // 优化过滤器处理
   const handleFilterChange = useCallback((key, value) => {
     setFilter(prev => ({ ...prev, [key]: value }));
+    setPagination(prev => ({ ...prev, page: 1 })); // 重置到第一页
+  }, []);
+
+  // 处理数据库选择变更
+  const handleDatabaseChange = useCallback((selected) => {
+    setSelectedDatabases(selected);
     setPagination(prev => ({ ...prev, page: 1 })); // 重置到第一页
   }, []);
 
@@ -144,24 +183,61 @@ export default function SlowQueryList() {
           </div>
         </div>
         <div className="col-lg-4 col-md-6">
-          <div className="input-group">
-            <span className="input-group-text">
-              <DatabaseIcon size={16} />
-            </span>
-            <Form.Control
-              placeholder="按数据库过滤"
-              className="form-control-lg"
-              onChange={e => handleFilterChange('dbname', e.target.value)}
-            />
-          </div>
+          <MultiSelectDropdown
+            options={databases}
+            selectedValues={selectedDatabases}
+            onChange={handleDatabaseChange}
+            placeholder="选择数据库（可多选）"
+            disabled={loading}
+          />
         </div>
+        {selectedDatabases.length > 0 && (
+          <div className="col-12">
+            <div className="d-flex align-items-center gap-2">
+              <span className="text-muted small">已选择:</span>
+              <Button 
+                variant="outline-secondary" 
+                size="sm"
+                onClick={() => handleDatabaseChange([])}
+              >
+                清空选择
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
       
       {/* 慢查询列表 */}
       <div className="mb-3">
-        {queries.data.map(query => (
-          <QueryItem key={query.checksum} fingerprint={query} />
-        ))}
+        {loading ? (
+          <div className="text-center py-5">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">加载中...</span>
+            </div>
+            <div className="mt-2 text-muted">正在加载慢查询列表...</div>
+          </div>
+        ) : queries.data.length === 0 ? (
+          <div className="text-center py-5 text-muted">
+            <DatabaseIcon size={48} className="mb-3" />
+            <div>暂无慢查询数据</div>
+            {(selectedDatabases.length > 0 || filter.username) && (
+              <div className="small mt-2">尝试调整过滤条件查看更多结果</div>
+            )}
+          </div>
+        ) : (
+          <>
+            {/* 结果统计 */}
+            <div className="mb-3 text-muted small">
+              共找到 {queries.total} 条慢查询
+              {selectedDatabases.length > 0 && (
+                <span>，已过滤数据库: {selectedDatabases.join(', ')}</span>
+              )}
+            </div>
+            {queries.data.map(query => (
+              <QueryItem key={query.checksum} fingerprint={query} />
+            ))}
+          </>
+        )}
       </div>
 
       {/* 分页 */}

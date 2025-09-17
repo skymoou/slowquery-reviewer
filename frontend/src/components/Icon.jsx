@@ -8,7 +8,9 @@ import {
   FiClock, 
   FiRefreshCw, 
   FiHash, 
-  FiSearch 
+  FiSearch,
+  FiChevronDown,
+  FiChevronUp
 } from 'react-icons/fi';
 
 // Bootstrap Icons 到 React Icons 的映射
@@ -24,6 +26,8 @@ const IconMap = {
   'bi-repeat': FiRefreshCw,
   'bi-hash': FiHash,
   'bi-search': FiSearch,
+  'bi-chevron-down': FiChevronDown,
+  'bi-chevron-up': FiChevronUp,
 };
 
 /**
@@ -54,5 +58,7 @@ export const ClockIcon = (props) => <Icon name="bi-clock-history" {...props} />;
 export const RefreshIcon = (props) => <Icon name="bi-repeat" {...props} />;
 export const HashIcon = (props) => <Icon name="bi-hash" {...props} />;
 export const SearchIcon = (props) => <Icon name="bi-search" {...props} />;
+export const ChevronDownIcon = (props) => <Icon name="bi-chevron-down" {...props} />;
+export const ChevronUpIcon = (props) => <Icon name="bi-chevron-up" {...props} />;
 
 export default Icon;

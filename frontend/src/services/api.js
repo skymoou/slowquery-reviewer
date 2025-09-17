@@ -110,6 +110,32 @@ export const queryAPI = {
       console.error('获取用户详细统计失败:', error.response || error);
       throw error;
     }
+  },
+
+  // 获取数据库列表
+  getDatabases: async () => {
+    console.log('正在请求数据库列表');
+    try {
+      const response = await api.get('/queries/databases');
+      console.log('获取数据库列表成功:', response.data);
+      return response;
+    } catch (error) {
+      console.error('获取数据库列表失败:', error.response || error);
+      throw error;
+    }
+  },
+
+  // 获取用户列表
+  getUsers: async () => {
+    console.log('正在请求用户列表');
+    try {
+      const response = await api.get('/queries/users');
+      console.log('获取用户列表成功:', response.data);
+      return response;
+    } catch (error) {
+      console.error('获取用户列表失败:', error.response || error);
+      throw error;
+    }
   }
 };
 

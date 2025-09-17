@@ -41,9 +41,19 @@ def get_slow_queries():
             conditions.append("username = %s")
             params.append(username)
         
-        # 处理数据库名过滤
+        # 处理数据库名过滤（支持多选）
         dbname = request.args.get('dbname')
-        if dbname:
+        dbnames = request.args.get('dbnames')  # 多选数据库
+        
+        if dbnames:
+            # 多选数据库，dbnames格式为逗号分隔的字符串
+            db_list = [db.strip() for db in dbnames.split(',') if db.strip()]
+            if db_list:
+                placeholders = ','.join(['%s'] * len(db_list))
+                conditions.append(f"dbname IN ({placeholders})")
+                params.extend(db_list)
+        elif dbname:
+            # 单选数据库（保持向后兼容）
             conditions.append("dbname = %s")
             params.append(dbname)
         
@@ -90,7 +100,7 @@ def get_slow_queries():
         offset = (page - 1) * per_page
         
         # 按执行次数倒序排序，如果有过滤条件则优先按执行次数排序
-        if username or dbname:
+        if username or dbname or dbnames:
             base_query += " ORDER BY total_occurrences DESC, last_occurrence DESC LIMIT %s OFFSET %s"
         else:
             base_query += " ORDER BY last_occurrence DESC LIMIT %s OFFSET %s"
@@ -442,6 +452,108 @@ def get_user_detail_stats(username):
         return api_response(
             success=False,
             message=f"获取用户详细统计失败: {str(e)}",
+            status_code=500
+        )
+    finally:
+        if cursor:
+            cursor.close()
+        if db:
+            db.close()
+
+@queries_bp.route('/queries/databases')
+@permission_required('SLOW_QUERY_VIEW')
+@handle_api_error("DATABASE_LIST_ERROR")
+def get_database_list():
+    """获取所有数据库名称列表"""
+    db = None
+    cursor = None
+    
+    try:
+        logger.debug("开始获取数据库列表")
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+        
+        # 获取所有不同的数据库名称，按查询数量排序
+        database_query = '''
+            SELECT 
+                f.dbname,
+                COUNT(DISTINCT f.id) as query_count,
+                COUNT(d.id) as total_occurrences,
+                MAX(d.timestamp) as last_activity
+            FROM slow_query_fingerprint f
+            LEFT JOIN slow_query_detail d ON f.checksum = d.checksum
+            WHERE f.dbname IS NOT NULL 
+                AND f.dbname != ''
+            GROUP BY f.dbname
+            ORDER BY total_occurrences DESC, query_count DESC
+        '''
+        
+        cursor.execute(database_query)
+        databases = cursor.fetchall()
+        
+        logger.info(f"成功获取数据库列表，共 {len(databases)} 个数据库")
+        return api_response(
+            success=True,
+            message="获取数据库列表成功",
+            data=databases
+        )
+        
+    except Exception as e:
+        logger.error(f"获取数据库列表失败: {str(e)}", exc_info=True)
+        return api_response(
+            success=False,
+            message=f"获取数据库列表失败: {str(e)}",
+            status_code=500
+        )
+    finally:
+        if cursor:
+            cursor.close()
+        if db:
+            db.close()
+
+@queries_bp.route('/queries/users')
+@permission_required('SLOW_QUERY_VIEW')  
+@handle_api_error("USER_LIST_ERROR")
+def get_user_list():
+    """获取所有用户名称列表"""
+    db = None
+    cursor = None
+    
+    try:
+        logger.debug("开始获取用户列表")
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+        
+        # 获取所有不同的用户名，按查询数量排序
+        user_query = '''
+            SELECT 
+                f.username,
+                COUNT(DISTINCT f.id) as query_count,
+                COUNT(d.id) as total_occurrences,
+                MAX(d.timestamp) as last_activity
+            FROM slow_query_fingerprint f
+            LEFT JOIN slow_query_detail d ON f.checksum = d.checksum
+            WHERE f.username IS NOT NULL 
+                AND f.username != ''
+            GROUP BY f.username
+            ORDER BY total_occurrences DESC, query_count DESC
+        '''
+        
+        cursor.execute(user_query)
+        users = cursor.fetchall()
+        
+        logger.info(f"成功获取用户列表，共 {len(users)} 个用户")
+        return api_response(
+            success=True,
+            message="获取用户列表成功",
+            data=users
+        )
+        
+    except Exception as e:
+        logger.error(f"获取用户列表失败: {str(e)}", exc_info=True)
+        return api_response(
+            success=False,
+            message=f"获取用户列表失败: {str(e)}",
             status_code=500
         )
     finally:
