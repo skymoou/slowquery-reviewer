@@ -18,9 +18,9 @@ try:
 except ImportError:
     print("警告: 未找到server_config.py配置文件，使用默认配置")
     DB_CONFIG = {
-        'host': '172.16.176.70',
+        'host': '1.1.1.1',
         'user': 'root',
-        'password': 'SlowQ#123',  # 需要修改
+        'password': '123456',  # 需要修改
         'database': 'slow_query_analysis',
         'charset': 'utf8mb4',
         'autocommit': False
