@@ -18,9 +18,9 @@ try:
 except ImportError:
     print("警告: 未找到server_config.py配置文件，使用默认配置")
     DB_CONFIG = {
-        'host': '172.16.176.70',
+        'host': '1.1.1.1',
         'user': 'root',
-        'password': 'SlowQ#123',  # 需要修改
+        'password': '123456',  # 需要修改
         'database': 'slow_query_analysis',
         'charset': 'utf8mb4',
         'autocommit': False
@@ -42,35 +42,6 @@ try:
 except ImportError:
     # 如果没有配置文件，使用默认映射
     USER_TO_DATABASE_MAPPING = {
-        'act_user':'posx_act',
-        'act_user_prd':'posx_act',
-        'aegean_user':'posx_aegean',
-        'prd_user':'posx_prd',
-        'tras_user':'posx_prd',
-        'agentuser':'posx_agent',
-        'bss_user':'posx_bss',
-        'pms_user':'posx_pms',
-        'pps_user':'posx_pps',
-        'risk_user':'posx_risk',
-        'stock_user':'posx_stock',
-        'dc_user':'posx_dc',
-        'dls_user':'posx_dlc',
-        'dms_user':'posx_dms',
-        'drs_user':'posx_drs',
-        'ifs_user':'ifs_gateway',
-        'ifsedu_user':'ifs_education',
-        'k8snacos_user':'wpk8s_nacos',
-        'mer_user':'posx_mer',
-        'mer_user_prd':'posx_mer',
-        'nacos_user':'wpk8s_nacos',
-        'rhk_user':'reassure_housekeeper',
-        'sas_user':'posx_sas',
-        'tcs_user':'posx_tcs',
-        'wop_user':'posx_wop',
-        'wos_user':'posx_wos',
-        'xxl_user':'xxl_job',
-        'yeepay_user':'posx_yeepay',
-        'dls_o':'posx_dls',
         # 可以根据需要添加更多映射关系
         # 'username': 'database_name',
     }
